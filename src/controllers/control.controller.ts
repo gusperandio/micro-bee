@@ -1,7 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 import { FastifyRequest, FastifyReply } from "fastify";
-import { DemandDataType } from "../types/DemandData";
-import { ControlDataType } from "../types/ControlData";
 import { createControl, selectAllControls } from "../services/demandService";
 const prisma = new PrismaClient();
 export async function getAllControls(req: FastifyRequest, reply: FastifyReply) {
