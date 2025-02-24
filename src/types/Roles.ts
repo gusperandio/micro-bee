@@ -6,7 +6,7 @@ export enum Roles {
 }
 
 export type RoleType = {
-  id: number;
+  id?: number;
   name: Roles;
   description?: string;
 };

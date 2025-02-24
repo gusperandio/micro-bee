@@ -1,22 +1,19 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
+import { LogType } from "../types/Log";
 
 const prisma = new PrismaClient();
 
-interface LogData {
-  message: string;
-  level: 'INFO' | 'WARN' | 'ERROR';
-  timestamp?: Date;
-}
-
 export class LogService {
-  async createLog(data: LogData) {
+  async createLog(data: LogType) {
     const log = await prisma.log.create({
-      data: {
-        message: data.message,
-        level: data.level,
-        timestamp: data.timestamp || new Date(),
-      },
+      data,
     });
+
     return log;
   }
+}
+
+
+export function sum(a: number, b: number) {
+  return a + b;
 }

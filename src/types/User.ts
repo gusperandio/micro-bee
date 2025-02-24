@@ -2,20 +2,31 @@ import { AwardType } from "./Award";
 import { CreditCardType } from "./CreditCard";
 import { NewsType } from "./News";
 import { PaymentType } from "./Payment";
+import { RoleType } from "./Roles";
 
 export type UserType = {
-  id: number;
   name: string;
   password?: string;
   email: string;
   age: number;
   socialAuth?: boolean;
   premiumTime?: Date;
-  lastLogin?: string;
-  createdAt: string;
-  updatedAt: string;
-  news: NewsType[];
-  awards: AwardType[];
+  lastLogin?: Date;
+  role?: string;
+  news?: NewsType[];
+  awards?: AwardType[];
   creditCard?: CreditCardType;
-  payments: PaymentType[];
+  payments?: PaymentType[];
+};
+
+export type UserLoginType = {
+  email: string;
+  password: string;
+};
+
+export type UserSocialLoginType = {
+  email: string;
+  password: string;
+  name: string;
+  socialAuth: boolean;
 };

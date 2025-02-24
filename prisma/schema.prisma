@@ -19,7 +19,7 @@ model User {
   password    String?
   email       String      @unique
   age         Int
-  socialAuth  Boolean?
+  socialAuth  Boolean
   premiumTime DateTime?
   lastLogin   DateTime?
   createdAt   DateTime    @default(now())
@@ -27,8 +27,8 @@ model User {
   news        News[]
   awards      Award[]
   creditCard  CreditCard?
-  roles       Role[]
-  Payment     Payment[]
+  roles       UserRole[]
+  payments    Payment[]
 }
 
 model News {
@@ -54,14 +54,14 @@ model Tag {
 }
 
 model Award {
-  id          Int    @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   title       String
   year        Int
   description String
-  user        User   @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
   userId      Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model CreditCard {
@@ -84,8 +84,8 @@ model Payment {
   userId    Int
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
-  Voucher   Voucher?      @relation(fields: [Voucherid], references: [id])
-  Voucherid Int?
+  voucher   Voucher?      @relation(fields: [voucherId], references: [id])
+  voucherId Int?
 }
 
 enum PaymentMethod {
@@ -109,20 +109,22 @@ model Role {
   id          Int     @id @default(autoincrement())
   name        String  @unique
   description String?
-  users       User[]
+  users       UserRole[]
 }
 
-enum Roles {
-  ADMIN
-  USER
-  MODERATOR
-  EDITOR
+model UserRole {
+  userId  Int
+  roleId  Int
+  user    User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role    Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
 }
 
 model Log {
-  id    Int    @id @default(autoincrement())
-  name  String
-  error String @db.VarChar(255)
+  id        Int      @id @default(autoincrement())
+  name      String
+  error     String   @db.VarChar(255)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

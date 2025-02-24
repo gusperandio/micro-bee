@@ -1,53 +1,50 @@
-import demandRoutes from "./src/routes/demand.routes";
+import userRoutes from "./src/routes/user.routes";
 
-const app = require('fastify')({ logger: true });
-const cors = require('@fastify/cors');
-const { Server } = require('socket.io');
+const app = require("fastify")({ logger: true });
+const cors = require("@fastify/cors");
+const { Server } = require("socket.io");
 
-// Configure CORS
-app.register(cors, { 
-  origin: '*',
-  methods: ['*']
+app.register(cors, {
+  origin: "*",
+  methods: ["*"],
 });
 
-app.register(demandRoutes, { prefix: '/api/v1/demands' });
+app.register(userRoutes, { prefix: "/api/v1/user" });
 
-// Create HTTP server through Fastify
 const server = app.server;
 
-// Set up Socket.IO with CORS
 const io = new Server(server, {
   cors: {
-    origin: '*',
-    methods: ['*'],
+    origin: "*",
+    methods: ["*"],
   },
 });
- 
-io.on('connection', (socket: any) => {
-  console.log('a user connected');
 
-  socket.on('message', (data: any) => { 
-    io.emit('message', `Server received: ${data}`);
+io.on("connection", (socket: any) => {
+  console.log("a user connected");
+
+  socket.on("message", (data: any) => {
+    io.emit("message", `Server received: ${data}`);
   });
 
-  socket.on('approved', (data: any) => {
-    io.emit('approved', `${data} Aprovou!`);
+  socket.on("approved", (data: any) => {
+    io.emit("approved", `${data} Aprovou!`);
   });
 
-  socket.on('refused', (data: any) => { 
-    io.emit('refused', `${data} Reprovou!`);
+  socket.on("refused", (data: any) => {
+    io.emit("refused", `${data} Reprovou!`);
   });
 
-  socket.on('noVote', (data: any) => { 
-    io.emit('noVote', `${data} Não votou!`);
+  socket.on("noVote", (data: any) => {
+    io.emit("noVote", `${data} Não votou!`);
   });
 
-  socket.on('showModal', () => { 
-    io.emit('showModal');
+  socket.on("showModal", () => {
+    io.emit("showModal");
   });
 
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
   });
 });
 

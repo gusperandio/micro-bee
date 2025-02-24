@@ -1,5 +1,6 @@
-export type Log = {
-  id: number;
-  name: Roles;
-  description?: string;
+export type LogType = {
+  name: string;
+  error: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
