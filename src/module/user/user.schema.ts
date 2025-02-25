@@ -5,6 +5,8 @@ const createUserSchema = z.object({
   email: z.string(),
   password: z.string().min(6).max(40),
   name: z.string(),
+  age: z.number(),
+  role: z.string().optional(),
 });
 
 const createUserSocialSchema = z.object({

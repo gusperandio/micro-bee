@@ -11,24 +11,7 @@ export const createUser = async (data: UserType): Promise<RespCustomType> => {
       return { status: 400, message: "E-mail em uso!" } as RespCustomType;
     }
 
-    const newUser = await prisma.user.create({
-      data: {
-        name: data.name,
-        password: data.password,
-        email: data.email,
-        age: data.age,
-        socialAuth: false,
-        premiumTime: data.premiumTime ?? null,
-        lastLogin: new Date(),
-        roles: {
-          create: [
-            {
-              role: { connect: { name: data.role ?? "USER" } },
-            },
-          ],
-        },
-      },
-    });
+    
 
     if (!newUser) {
       throw new Error("Erro ao cadastrar usuário! Tente mais tarde.");
