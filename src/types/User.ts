@@ -9,6 +9,7 @@ export type UserType = {
   password?: string;
   email: string;
   age: number;
+  avatar?: string;
   socialAuth?: boolean;
   premiumTime?: Date;
   lastLogin?: Date;

@@ -19,6 +19,7 @@ model User {
   password    String?
   email       String      @unique
   age         Int
+  avatar      String?
   socialAuth  Boolean
   premiumTime DateTime?
   lastLogin   DateTime?
