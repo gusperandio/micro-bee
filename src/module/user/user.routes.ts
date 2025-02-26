@@ -8,12 +8,7 @@ import {
   updateUserController,
 } from "./user.controller";
 import { $ref } from "./user.schema";
-
-const middleware = (_req: any, _res: any, next: any) => {
-  // const token = app.jwt.sign({ id: 12 });
-  console.log("token middleware");
-  next();
-};
+import { authMiddleware } from "../../config/authenticate";
 
 export async function userRoutes(app: FastifyInstance) {
   app.post(
@@ -58,7 +53,7 @@ export async function userRoutes(app: FastifyInstance) {
   app.put(
     "/update",
     {
-      // preHandler: [middleware],
+      preHandler: [authMiddleware],
       schema: {
         body: $ref("updateUserSchema"),
         response: {
@@ -72,7 +67,7 @@ export async function userRoutes(app: FastifyInstance) {
   app.delete(
     "/delete",
     {
-      // preHandler: [middleware],
+      preHandler: [authMiddleware],
       schema: {
         body: $ref("deleteUserSchema"),
         response: {
@@ -83,26 +78,7 @@ export async function userRoutes(app: FastifyInstance) {
     deleteUserController
   );
 
-  app.delete("/logout", { preHandler: [middleware] }, logoutController);
-  app.get(
-    "/try",
-    {
-      preHandler: [app.authenticate],
-      // preHandler: [app.authenticate],
-      schema: {
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              message: { type: "string" },
-            },
-          },
-        },
-      },
-    },
-    (_req: FastifyRequest, reply: FastifyReply) => {
-      reply.code(200).send({ message: "controller here" });
-    }
-  );
+  app.delete("/logout", { preHandler: [authMiddleware] }, logoutController);
+
   app.log.info("user routes registered");
 }

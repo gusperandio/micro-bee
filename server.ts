@@ -1,52 +1,56 @@
+"use strict";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { userRoutes } from "./src/module/user/user.routes";
 import { userSchemas } from "./src/module/user/user.schema";
 import fCookie from "@fastify/cookie";
 import fjwt, { FastifyJWT } from "@fastify/jwt";
 
-const app = require("fastify")({ logger: true });
+const fastify = require("fastify")({ logger: true });
 const cors = require("@fastify/cors");
 
-app.register(cors, {
+fastify.register(cors, {
   origin: "*",
   methods: ["*"],
 });
-app.register(require("@fastify/jwt"), { secret: process.env.SECRET_KEY });
 
-// app.addHook("preHandler", async (req: FastifyRequest, reply: FastifyReply) => {
-//   try {
-//     console.log("preHandler");
-//     await req.jwtVerify();
-//   } catch (err) {
-//     reply.send(err);
+fastify.register(require("@fastify/jwt"), { secret: process.env.SECRET_KEY });
+
+// fastify.addHook(
+//   "preHandler",
+//   async (req: FastifyRequest, reply: FastifyReply) => {
+//     try {
+//       console.log(req.originalUrl);
+//       await req.jwtVerify();
+//     } catch (err) {
+//       reply.send(err);
+//     }
 //   }
-// });
+// );
 
-app.register(fCookie, {
+fastify.register(fCookie, {
   secret: process.env.COOKIE_KEY,
   hook: "preHandler",
 });
 
- 
-app.decorate(
-  "authenticate",
-  async function (req: FastifyRequest, reply: FastifyReply) {
-    try {
-      await req.jwtVerify();
-    } catch (err) {
-      reply.status(401).send({ message: "Unauthorized" });
-    }
-  }
-);
+//  fastify.decorate(
+//    "authenticate",
+//    async function (req: FastifyRequest, reply: FastifyReply) {
+//      try {
+//        await req.jwtVerify();
+//      } catch (err) {
+//        reply.status(401).send({ message: "Unauthorized" });
+//      }
+//    }
+//  );
 
 for (let schema of userSchemas) {
-  app.addSchema(schema);
+  fastify.addSchema(schema);
 }
 
-app.register(userRoutes, { prefix: "/api/v1/user" });
+fastify.register(userRoutes, { prefix: "/api/v1/user" });
 
 // const { Server } = require("socket.io");
-// const server = app.server;
+// const server = fastify.server;
 
 // const io = new Server(server, {
 //   cors: {
@@ -87,18 +91,18 @@ app.register(userRoutes, { prefix: "/api/v1/user" });
 const listeners = ["SIGINT", "SIGTERM"];
 listeners.forEach((signal) => {
   process.on(signal, async () => {
-    await app.close();
+    await fastify.close();
     process.exit(0);
   });
 });
 
 async function main() {
-  app.listen({ port: 3000 }, (err?: Error, address?: string) => {
+  fastify.listen({ port: 3000 }, (err?: Error, address?: string) => {
     if (err) {
-      app.log.error(err);
+      fastify.log.error(err);
       process.exit(1);
     }
-    app.log.info(`Server listening at ${address}`);
+    fastify.log.info(`Server listening at ${address}`);
   });
 }
 main();

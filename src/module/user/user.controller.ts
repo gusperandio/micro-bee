@@ -6,16 +6,14 @@ import {
   LoginUserInput,
   UpdateUserInput,
 } from "./user.schema";
-import prisma from "../../util/prisma";
-import bcrypt from "bcrypt";
+import prisma from "../../util/prisma"; 
 import {
   checkUser,
   deleteUser,
   updateLastLogin,
   updateUser,
 } from "./userService";
-import PasswordManager from "../../util/passwordManager";
-import e from "cors";
+import PasswordManager from "../../util/passwordManager"; 
 import { payload } from "../../util/payload";
 
 export async function createUserController(
@@ -25,16 +23,15 @@ export async function createUserController(
   reply: FastifyReply
 ) {
   const { password, email, name, age, role } = req.body;
-
   if (await checkUser(email)) {
     return reply.code(401).send({
       message: "E-mail em uso!",
     });
   }
-
+  
   try {
     const hash = await PasswordManager.getInstance().hashPassword(password);
-
+    
     const newUser = await prisma.user.create({
       data: {
         name: name,
@@ -55,6 +52,7 @@ export async function createUserController(
     });
 
     const token = req.server.jwt.sign(payload(newUser.name));
+    console.log("TESTANDO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", token);
     reply.setCookie("access_token", token, {
       path: "/login",
       httpOnly: true,
@@ -85,7 +83,7 @@ export async function loginSocialController(
   let user = await prisma.user.findUnique({
     where: { email: email },
   });
-
+  console.log(user);
   if (!user) {
     try {
       user = await prisma.user.create({
@@ -176,6 +174,7 @@ export async function updateUserController(
   }>,
   reply: FastifyReply
 ) {
+  
   const { id, email, password, name, age, role, premiumTime } = req.body;
   const userExist = await prisma.user.findUnique({ where: { id } });
 
