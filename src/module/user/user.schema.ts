@@ -9,12 +9,15 @@ const createUserSchema = z.object({
   role: z.string().optional(),
 });
 
-const createUserSocialSchema = z.object({
+const createOrLoginSocialUserSchema = z.object({
   email: z.string(),
   name: z.string(),
 });
 
-export type CreateUserInput = z.infer<typeof createUserSchema>; 
+export type CreateUserInput = z.infer<typeof createUserSchema>;
+export type CreateOrLoginSocialUserInput = z.infer<
+  typeof createOrLoginSocialUserSchema
+>;
 
 const loginSchema = z.object({
   email: z
@@ -27,6 +30,7 @@ const loginSchema = z.object({
 });
 
 export type LoginUserInput = z.infer<typeof loginSchema>;
+
 const loginResponseSchema = z.object({
   id: z.string(),
   email: z.string(),
@@ -35,11 +39,38 @@ const loginResponseSchema = z.object({
   expire_in: z.number(),
   token_type: z.string(),
 });
-// to build our JSON schema, we use buildJsonSchemas from fastify-zod
-// it returns all the schemas to register and a ref to refer these schemas
+
+const updateUserSchema = z.object({
+  id: z.number(),
+  email: z.string().optional(),
+  password: z.string().min(6).max(40).optional(),
+  name: z.string().optional(),
+  age: z.number().optional(),
+  role: z.string().optional(),
+  premiumTime: z.date().optional(),
+});
+export type UpdateUserInput = z.infer<typeof updateUserSchema>;
+
+const updateResponseUserSchema = z.object({
+  message: z.string(),
+});
+
+const deleteUserSchema = z.object({
+  id: z.number(),
+});
+export type DeleteUserInput = z.infer<typeof deleteUserSchema>;
+
+const deleteResponseUserSchema = z.object({
+  message: z.string(),
+});
+
 export const { schemas: userSchemas, $ref } = buildJsonSchemas({
   createUserSchema,
-  createUserSocialSchema, 
+  createOrLoginSocialUserSchema,
   loginSchema,
   loginResponseSchema,
+  deleteUserSchema,
+  deleteResponseUserSchema,
+  updateUserSchema,
+  updateResponseUserSchema,
 });

@@ -2,14 +2,14 @@ import { JWT } from "@fastify/jwt";
 import "@fastify/jwt";
 import { FastifyInstance, FastifyRequest } from "fastify";
 
-
-
 declare module "fastify" {
-  interface FastifyRequest {
-    jwt: JWT;
+  interface FastifyInstance {
+    jwt: JWT; 
   }
-  export interface FastifyInstance {
-    authenticate: any;
+}
+declare module "fastify" {
+  interface FastifyInstance {
+    authenticate: (req: FastifyRequest, reply: FastifyReply) => Promise<void>;
   }
 }
 type UserPayload = {

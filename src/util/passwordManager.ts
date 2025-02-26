@@ -1,18 +1,18 @@
 const bcrypt = require("bcrypt");
 
-class PassManager {
-  private static instance: PassManager;
+class PasswordManager {
+  private static instance: PasswordManager;
   saltRounds: number;
 
   private constructor(saltRounds: number) {
     this.saltRounds = saltRounds;
   }
 
-  public static getInstance(saltRounds: number = 10): PassManager {
-    if (!PassManager.instance) {
-      PassManager.instance = new PassManager(saltRounds);
+  public static getInstance(saltRounds: number = 10): PasswordManager {
+    if (!PasswordManager.instance) {
+      PasswordManager.instance = new PasswordManager(saltRounds);
     }
-    return PassManager.instance;
+    return PasswordManager.instance;
   }
 
   public async hashPassword(password: string): Promise<string> {
@@ -24,4 +24,4 @@ class PassManager {
   }
 }
 
-export default PassManager;
+export default PasswordManager;
