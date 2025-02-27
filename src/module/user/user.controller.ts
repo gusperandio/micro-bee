@@ -1,3 +1,4 @@
+import { UserType } from "./../../types/User";
 import { FastifyRequest, FastifyReply } from "fastify";
 import {
   CreateOrLoginSocialUserInput,
@@ -14,44 +15,41 @@ import {
   getUserById,
   updateLastLogin,
   updateUser,
-} from "./userService";
+  createUser,
+} from "./user.repository";
 import PasswordManager from "../../util/passwordManager";
 import { payload } from "../../util/payload";
-
 export async function createUserController(
   req: FastifyRequest<{
     Body: CreateUserInput;
   }>,
   reply: FastifyReply
 ) {
-  const { password, email, name, age, role } = req.body;
-  if (await userExist(email)) {
-    return reply.code(401).send({
-      message: "E-mail em uso!",
-    });
-  }
-
   try {
-    const hash = await PasswordManager.getInstance().hashPassword(password);
+    const { password, email, name, age, role } = req.body;
+    if (await userExist(email)) {
+      return reply.code(401).send({
+        message: "E-mail em uso!",
+      });
+    }
 
-    const newUser = await prisma.user.create({
-      data: {
-        name: name,
-        password: hash,
-        email: email,
-        age: age,
-        socialAuth: false,
-        premiumTime: null,
-        lastLogin: new Date(),
-        roles: {
-          create: [
-            {
-              role: { connect: { name: role ?? "USER" } },
-            },
-          ],
-        },
-      },
-    });
+    const hash = await PasswordManager.getInstance().hashPassword(password);
+    const userType: Partial<UserType> = {
+      password: hash,
+      email: email,
+      name: name,
+      age: age,
+      role: role,
+      socialAuth: false,
+    };
+
+    const newUser = await createUser(userType);
+    if (!newUser) {
+      return reply.code(400).send({
+        message: "Erro ao criar usuário!",
+      });
+    }
+
     updateLastLogin(newUser.id);
     const token = req.server.jwt.sign(payload(newUser.name));
 
@@ -74,30 +72,25 @@ export async function loginSocialController(
   }>,
   reply: FastifyReply
 ) {
-  const { email, name } = req.body;
-
-  let user = await getUserByEmail(email);
-
   try {
-    if (!user)
-      user = await prisma.user.create({
-        data: {
-          name: name,
-          password: null,
-          email: email,
-          age: 0,
-          socialAuth: true,
-          premiumTime: null,
-          lastLogin: new Date(),
-          roles: {
-            create: [
-              {
-                role: { connect: { name: "USER" } },
-              },
-            ],
-          },
-        },
-      });
+    const { email, name } = req.body;
+
+    let user = await getUserByEmail(email);
+    if (!user) {
+      const userType: Partial<UserType> = {
+        email: email,
+        name: name,
+        age: 0,
+        socialAuth: true,
+      };
+
+      user = await createUser(userType);
+      if (!user) {
+        return reply.code(400).send({
+          message: "Erro ao criar usuário!",
+        });
+      }
+    }
 
     updateLastLogin(user.id);
     const token = req.server.jwt.sign(payload(user.name));
@@ -121,40 +114,46 @@ export async function loginController(
   }>,
   reply: FastifyReply
 ) {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await getUserByEmail(email);
+    const user = await getUserByEmail(email);
 
-  if (user && user.socialAuth) {
-    return reply.code(401).send({
-      message: "Tente o login social com Google!",
+    if (user && user.socialAuth) {
+      return reply.code(401).send({
+        message: "Tente o login social com Google!",
+      });
+    }
+
+    const isMatch =
+      user &&
+      (await PasswordManager.getInstance().checkPassword(
+        password,
+        user.password!
+      ));
+
+    if (!user || !isMatch) {
+      return reply.code(401).send({
+        message: "Email ou senha invalidos!",
+      });
+    }
+
+    updateLastLogin(user.id);
+    const token = req.server.jwt.sign(payload(user.name));
+
+    return reply.code(201).send({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      access_token: token,
+      expire_in: 1000,
+      token_type: "Bearer",
+    });
+  } catch (error) {
+    return reply.code(500).send({
+      message: "Erro no servidor",
     });
   }
-
-  const isMatch =
-    user &&
-    (await PasswordManager.getInstance().checkPassword(
-      password,
-      user.password!
-    ));
-
-  if (!user || !isMatch) {
-    return reply.code(401).send({
-      message: "Email ou senha invalidos!",
-    });
-  }
-
-  updateLastLogin(user.id);
-  const token = req.server.jwt.sign(payload(user.name));
-
-  return reply.code(201).send({
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    access_token: token,
-    expire_in: 1000,
-    token_type: "Bearer",
-  });
 }
 
 export async function updateUserController(

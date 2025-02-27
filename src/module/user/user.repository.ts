@@ -2,8 +2,7 @@ import { PrismaClient, User as UserPrisma } from "@prisma/client";
 import { UserLoginType, UserSocialLoginType, UserType } from "../../types/User";
 import passManager from "../../util/passwordManager";
 import { RespCustomType } from "../../types/RespCustom";
-
-const prisma = new PrismaClient();
+import prisma from "../../util/prisma";
 
 export const userExist = async (email: string): Promise<boolean> => {
   const user = await prisma.user.findUnique({
@@ -32,6 +31,39 @@ export const getUserByEmail = async (
     return user;
   } catch (error) {
     console.error("Error fetching user by ID:", error);
+    return null;
+  }
+};
+
+export const createUser = async (
+  data: Partial<UserType>
+): Promise<UserPrisma | null> => {
+  try {
+    const newUser = await prisma.user.create({
+      data: {
+        name: data.name!,
+        password: data.password,
+        email: data.email!,
+        age: data.age!,
+        socialAuth: data.socialAuth!,
+        premiumTime: null,
+        lastLogin: new Date(),
+        roles: {
+          create: [
+            {
+              role: { connect: { name: data.role ?? "USER" } },
+            },
+          ],
+        },
+      },
+    });
+
+    if (!newUser) {
+      throw new Error("Erro ao criar usuário");
+    }
+    return newUser;
+  } catch (error) {
+    console.error("Erro", error);
     return null;
   }
 };
