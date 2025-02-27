@@ -5,6 +5,15 @@ import { RespCustomType } from "../../types/RespCustom";
 
 const prisma = new PrismaClient();
 
+export const userExist = async (email: string): Promise<boolean> => {
+  const user = await prisma.user.findUnique({
+    where: { email: email },
+  });
+
+  if (user) return true;
+  return false;
+};
+
 export const getUserById = async (id: number): Promise<UserPrisma | null> => {
   try {
     const user = await prisma.user.findUnique({ where: { id } });
@@ -15,28 +24,40 @@ export const getUserById = async (id: number): Promise<UserPrisma | null> => {
   }
 };
 
+export const getUserByEmail = async (
+  email: string
+): Promise<UserPrisma | null> => {
+  try {
+    const user = await prisma.user.findUnique({ where: { email: email } });
+    return user;
+  } catch (error) {
+    console.error("Error fetching user by ID:", error);
+    return null;
+  }
+};
+
 export const updateUser = async (
   id: number,
-  data: Partial<UserType>
+  data: Partial<any>
 ): Promise<boolean> => {
   try {
+    if (data.role !== undefined) {
+      data.roles = {
+        create: [
+          {
+            role: { connect: { name: data.role } },
+          },
+        ],
+      };
+    }
+
     const updated = await prisma.user.update({
-      where: { id },
-      data: {
-        name: data.name,
-        password: data.password,
-        email: data.email,
-        age: data.age,
-        premiumTime: data.premiumTime,
-        roles: {
-          create: [
-            {
-              role: { connect: { name: data.role } },
-            },
-          ],
-        },
+      where: {
+        id: id,
       },
+      data: data,
     });
+
     if (!updated) {
       throw new Error("User update failed!");
     }
@@ -49,8 +70,11 @@ export const updateUser = async (
 
 export const deleteUser = async (id: number): Promise<boolean> => {
   try {
-    const deleted = prisma.user.delete({ where: { id } });
-    if (!deleted) {
+    const deleteUser = await prisma.user.delete({
+      where: { id: id },
+    });
+
+    if (!deleteUser) {
       throw new Error("User deleted failed!");
     }
     return true;
@@ -58,15 +82,6 @@ export const deleteUser = async (id: number): Promise<boolean> => {
     console.error("Error delete user:", error);
     return false;
   }
-};
-
-export const checkUser = async (email: string): Promise<boolean> => {
-  const user = await prisma.user.findUnique({
-    where: { email: email },
-  });
-
-  if (user) return true;
-  return false;
 };
 
 export const updateLastLogin = async (id: number): Promise<boolean> => {

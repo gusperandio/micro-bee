@@ -1,10 +1,9 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { FastifyInstance } from "fastify";
 import {
   createUserController,
   deleteUserController,
   loginController,
   loginSocialController,
-  logoutController,
   updateUserController,
 } from "./user.controller";
 import { $ref } from "./user.schema";
@@ -77,8 +76,6 @@ export async function userRoutes(app: FastifyInstance) {
     },
     deleteUserController
   );
-
-  app.delete("/logout", { preHandler: [authMiddleware] }, logoutController);
 
   app.log.info("user routes registered");
 }

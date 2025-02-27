@@ -6,14 +6,16 @@ import {
   LoginUserInput,
   UpdateUserInput,
 } from "./user.schema";
-import prisma from "../../util/prisma"; 
+import prisma from "../../util/prisma";
 import {
-  checkUser,
+  userExist,
   deleteUser,
+  getUserByEmail,
+  getUserById,
   updateLastLogin,
   updateUser,
 } from "./userService";
-import PasswordManager from "../../util/passwordManager"; 
+import PasswordManager from "../../util/passwordManager";
 import { payload } from "../../util/payload";
 
 export async function createUserController(
@@ -23,15 +25,15 @@ export async function createUserController(
   reply: FastifyReply
 ) {
   const { password, email, name, age, role } = req.body;
-  if (await checkUser(email)) {
+  if (await userExist(email)) {
     return reply.code(401).send({
       message: "E-mail em uso!",
     });
   }
-  
+
   try {
     const hash = await PasswordManager.getInstance().hashPassword(password);
-    
+
     const newUser = await prisma.user.create({
       data: {
         name: name,
@@ -50,20 +52,14 @@ export async function createUserController(
         },
       },
     });
-
+    updateLastLogin(newUser.id);
     const token = req.server.jwt.sign(payload(newUser.name));
-    console.log("TESTANDO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", token);
-    reply.setCookie("access_token", token, {
-      path: "/login",
-      httpOnly: true,
-      secure: true,
-    });
 
     return reply.code(201).send({
       id: newUser.id,
       email: newUser.email,
       name: newUser.name,
-      token,
+      access_token: token,
       expire_in: 1000,
       token_type: "Bearer",
     });
@@ -80,12 +76,10 @@ export async function loginSocialController(
 ) {
   const { email, name } = req.body;
 
-  let user = await prisma.user.findUnique({
-    where: { email: email },
-  });
-  console.log(user);
-  if (!user) {
-    try {
+  let user = await getUserByEmail(email);
+
+  try {
+    if (!user)
       user = await prisma.user.create({
         data: {
           name: name,
@@ -104,26 +98,21 @@ export async function loginSocialController(
           },
         },
       });
-    } catch (e) {
-      return reply.code(500).send(e);
-    }
+
+    updateLastLogin(user.id);
+    const token = req.server.jwt.sign(payload(user.name));
+
+    return reply.code(201).send({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      access_token: token,
+      expire_in: 1000,
+      token_type: "Bearer",
+    });
+  } catch (e) {
+    return reply.code(500).send(e);
   }
-
-  const token = req.server.jwt.sign(payload(user.name));
-  reply.setCookie("access_token", token, {
-    path: "/login",
-    httpOnly: true,
-    secure: true,
-  });
-
-  return reply.code(201).send({
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    token,
-    expire_in: 1000,
-    token_type: "Bearer",
-  });
 }
 
 export async function loginController(
@@ -134,7 +123,13 @@ export async function loginController(
 ) {
   const { email, password } = req.body;
 
-  const user = await prisma.user.findUnique({ where: { email: email } });
+  const user = await getUserByEmail(email);
+
+  if (user && user.socialAuth) {
+    return reply.code(401).send({
+      message: "Tente o login social com Google!",
+    });
+  }
 
   const isMatch =
     user &&
@@ -145,24 +140,18 @@ export async function loginController(
 
   if (!user || !isMatch) {
     return reply.code(401).send({
-      message: "Invalid email or password",
+      message: "Email ou senha invalidos!",
     });
   }
 
   updateLastLogin(user.id);
-
   const token = req.server.jwt.sign(payload(user.name));
-  reply.setCookie("access_token", token, {
-    path: "/login",
-    httpOnly: true,
-    secure: true,
-  });
 
   return reply.code(201).send({
     id: user.id,
     email: user.email,
     name: user.name,
-    token,
+    access_token: token,
     expire_in: 1000,
     token_type: "Bearer",
   });
@@ -174,12 +163,18 @@ export async function updateUserController(
   }>,
   reply: FastifyReply
 ) {
-  
-  const { id, email, password, name, age, role, premiumTime } = req.body;
-  const userExist = await prisma.user.findUnique({ where: { id } });
+  let { id, password, name, age, role, premiumTime } = req.body;
+  const userExist = await getUserById(id);
+
+  if (userExist?.socialAuth && password)
+    return reply.code(400).send({
+      message: "Login social não precisa alterar a senha!",
+    });
+
+  if (password)
+    password = await PasswordManager.getInstance().hashPassword(password);
 
   const updated = updateUser(userExist!.id, {
-    email,
     password,
     name,
     age,
@@ -187,11 +182,10 @@ export async function updateUserController(
     premiumTime,
   });
 
-  if (!updated) {
+  if (!updated)
     return reply.code(400).send({
       message: "Erro ao atualizar!",
     });
-  }
 
   const updateMessages = Object.entries(req.body)
     .filter(([_, value]) => value !== null && value !== undefined)
@@ -209,7 +203,7 @@ export async function deleteUserController(
   reply: FastifyReply
 ) {
   const { id } = req.body;
-  const userExist = await prisma.user.findUnique({ where: { id } });
+  const userExist = await getUserById(id);
 
   const deleted = deleteUser(userExist!.id);
 
@@ -219,16 +213,5 @@ export async function deleteUserController(
     });
   }
 
-  const updateMessages = Object.entries(req.body)
-    .filter(([_, value]) => value !== null && value !== undefined)
-    .map(([key, _]) => `${key} foi atualizado`);
-
-  return reply.code(201).send({
-    updateMessages,
-  });
-}
-
-export async function logoutController(req: FastifyRequest, reply: FastifyReply) {
-  reply.clearCookie("access_token");
-  return reply.send({ message: "Logout successful" });
+  return reply.code(200).send({ message: "Usuário deletado!" });
 }
