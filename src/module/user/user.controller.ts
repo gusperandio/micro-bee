@@ -19,6 +19,7 @@ import {
 } from "./user.repository";
 import PasswordManager from "../../util/passwordManager";
 import { payload } from "../../util/payload";
+import { askChatGPT } from "../../util/openai";
 export async function createUserController(
   req: FastifyRequest<{
     Body: CreateUserInput;

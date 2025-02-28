@@ -33,19 +33,21 @@ model User {
 }
 
 model News {
-  id        Int      @id @default(autoincrement())
-  title     String
-  argument  String   @db.VarChar(255)
-  tags      Tag[]
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  important Boolean
-  cover     String   @db.VarChar(255)
-  photo1    String   @db.VarChar(255)
-  photo2    String   @db.VarChar(255)
-  photo3    String   @db.VarChar(255)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         Int      @id @default(autoincrement())
+  title      String
+  argument   String   @db.VarChar(255)
+  tags       Tag[]
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id])
+  important  Boolean
+  minReads   Int?
+  aiValidate Boolean  @default(false)
+  cape       String   @db.VarChar(255)
+  photo1     String   @db.VarChar(255)
+  photo2     String   @db.VarChar(255)
+  photo3     String   @db.VarChar(255)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Tag {
@@ -107,17 +109,17 @@ model Voucher {
 }
 
 model Role {
-  id          Int     @id @default(autoincrement())
-  name        String  @unique
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
   description String?
   users       UserRole[]
 }
 
 model UserRole {
-  userId  Int
-  roleId  Int
-  user    User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role    Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  userId Int
+  roleId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([userId, roleId])
 }

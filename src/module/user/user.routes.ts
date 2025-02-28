@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import {
   createUserController,
-  deleteUserController,
+  deleteUserController, 
   loginController,
   loginSocialController,
   updateUserController,

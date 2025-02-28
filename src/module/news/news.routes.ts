@@ -1,11 +1,11 @@
 import { FastifyInstance } from "fastify";
 import { authMiddleware } from "../../config/authenticate";
-import { $ref } from "../user/user.schema";
+import { $ref } from "../news/news.schema";
+import { createNews, removeNews, getAllNews, getNewsById, getNewsByUserId, putNews, callAi } from "./news.controller";
 
 export async function newsRoutes(app: FastifyInstance) {
   app.get(
     "/news/:id",
-
     {
       preHandler: [authMiddleware],
       schema: {
@@ -13,49 +13,100 @@ export async function newsRoutes(app: FastifyInstance) {
           id: { type: "string" },
         },
         response: {
-          200: $ref("deleteResponseUserSchema"),
+          200: $ref("searchResponseNewsSchema"),
         },
       },
     },
-    async (request, reply) => {
-      const { id } = request.params;
-      // Logic to get news by id
-      reply.send({ id });
-    }
+    getNewsById
   );
 
-  app.get("/news", async (request, reply) => {
-    // Logic to get all news of the last 7 days
-    reply.send([]);
-  });
+  app.get(
+    "/news",
+    {
+      preHandler: [authMiddleware],
+      schema: {
+        response: {
+          200: $ref("newsArraySchemaResponse"),
+        },
+      },
+    },
+    getAllNews
+  );
 
-  app.get("/validateAI", async (request, reply) => {
-    // Logic to verify if text is correct using AI
-    reply.send([]);
-  });
+  app.get(
+    "/validateAI",
+    {
+      preHandler: [authMiddleware],
+      schema: {
+        body: $ref("aiVerificationTextSchema"),
+        response: {
+          200: $ref("aiVerificationResponseSchema"),
+        },
+      },
+    },
+    callAi
+  );
 
-  app.get("/news/user/:userId", async (request, reply) => {
-    const { userId } = request.params;
-    // Logic to get news by user ID
-    reply.send({ userId });
-  });
+  app.get(
+    "/news/user/:userId",
+    {
+      preHandler: [authMiddleware],
+      schema: {
+        params: {
+          userId: { type: "string" },
+        },
+        response: {
+          200: $ref("newsArraySchemaResponse"),
+        },
+      },
+    },
+    getNewsByUserId
+  );
 
-  app.post("/news", async (request, reply) => {
-    const newsData = request.body;
-    // Logic to post news
-    reply.send(newsData);
-  });
+  app.post(
+    "/news",
+    {
+      preHandler: [authMiddleware],
+      schema: {
+        body: $ref("createNewsSchema"),
+        response: {
+          200: $ref("createNewsResponse"),
+        },
+      },
+    },
+    createNews
+  );
 
-  app.put("/news/:id", async (request, reply) => {
-    const { id } = request.params;
-    const newsData = request.body;
-    // Logic to update news
-    reply.send({ id, ...newsData });
-  });
+  app.put(
+    "/news/:id",
+    {
+      preHandler: [authMiddleware],
+      schema: {
+        params: {
+          id: { type: "string" },
+        },
+        body: $ref("updateNewsSchema"),
+        response: {
+          200: $ref("searchResponseNewsSchema"),
+        },
+      },
+    },
+    putNews
+  );
 
-  app.delete("/news/:id", async (request, reply) => {
-    const { id } = request.params;
-    // Logic to delete news
-    reply.send({ id });
-  });
+  app.delete(
+    "/news/:id",
+    {
+      preHandler: [authMiddleware],
+      schema: {
+        params: {
+          id: { type: "string" },
+        },
+        response: {
+          200: $ref("deleteResponseNewsSchema"),
+        },
+      },
+    },
+    removeNews
+  );
 }

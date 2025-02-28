@@ -4,16 +4,14 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,  
 });
 
-async function askChatGPT() {
-  const response = await openai.chat.completions.create({
-    model: "gpt-4-turbo",
-    messages: [
-      { role: "system", content: "Você é um assistente útil." },
-      { role: "user", content: "Qual é a capital da França?" },
-    ],
+export async function askChatGPT(text: string) {
+  const response = await openai.moderations.create({
+    input: text,
   });
 
-  console.log(response.choices[0].message.content);
+  const result = response.results[0];
+  console.log(result);
+  return response;
 }
 
-askChatGPT();
+// askChatGPT("I hate you");

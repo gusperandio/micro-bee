@@ -6,8 +6,7 @@ export type NewsType = {
   title: string;
   argument: string;
   tags: TagType[];
-  userId: number;
-  user: UserType;
+  userId: number; 
   important: boolean;
   cover: string;
   photo1: string;
