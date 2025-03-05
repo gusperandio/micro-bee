@@ -26,6 +26,11 @@ export async function getNewsById(
 
 export async function getAllNews(req: FastifyRequest, reply: FastifyReply) {
   const news = await findAllNews();
+  if (!news) {
+    return reply.status(204).send({
+      message: "Nenhum conteúdo encontrado",
+    });
+  }
   reply.send(news);
 }
 
@@ -35,6 +40,11 @@ export async function getNewsByUserId(
 ) {
   const { userId } = req.params;
   const news = await findNewsByUserId(Number(userId));
+  if (!news)
+    return reply.status(204).send({
+      message: "Nenhum conteúdo encontrado",
+    });
+
   reply.send(news);
 }
 
@@ -44,26 +54,29 @@ export async function createNews(
 ) {
   const newsData = req.body;
   const news = await insertNews(newsData);
-  reply.send(news);
+  reply.send({ id: news?.id, message: "News created successfully" });
 }
 
 export async function putNews(
-  req: FastifyRequest<{ Params: { id: string }; Body: UpdateNewsInput }>,
+  req: FastifyRequest<{ Params: { newsId: string }; Body: UpdateNewsInput }>,
   reply: FastifyReply
 ) {
-  const { id } = req.params;
+  const { newsId } = req.params;
   const newsData = req.body;
-  const updatedNews = await updateNews(Number(id), newsData);
+  const updatedNews = await updateNews(Number(newsId), newsData);
   reply.send(updatedNews);
 }
 
 export async function removeNews(
-  req: FastifyRequest<{ Params: { id: string } }>,
+  req: FastifyRequest<{ Params: { newsId: string } }>,
   reply: FastifyReply
 ) {
-  const { id } = req.params;
-  const deletedNews = await deleteNews(Number(id));
-  reply.send(deletedNews);
+  const { newsId } = req.params;
+  const deletedNews = await deleteNews(Number(newsId));
+  if (!deletedNews) {
+    return reply.status(404).send({ message: "Erro ao deletar conteúdo!" });
+  }
+  reply.send({ message : "News deleted successfully" });
 }
 
 export async function callAi(

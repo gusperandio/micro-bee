@@ -10,7 +10,7 @@ export const searchResponseNewsSchema = z.object({
   id: z.number().int(),
   title: z.string(),
   argument: z.string(),
-  tags: z.array(z.string()),
+  tags: z.array(z.custom<TagPrisma>()).optional(),
   userId: z.number().int(),
   important: z.boolean(),
   minReads: z.number().int().optional(),
@@ -24,11 +24,11 @@ export const newsArraySchemaResponse = z.array(searchResponseNewsSchema);
 export const createNewsSchema = z.object({
   title: z
     .string()
-    .min(20, "Título deve ter mais de 20 caracteres")
+    .min(8, "Título deve ter mais de 8 caracteres")
     .max(120, "Título deve ter 120 caracteres ou menos"),
   argument: z
     .string()
-    .max(10000, "Conteúdo deve ter 10000 caracteres ou menos"),
+    .max(20000, "Conteúdo deve ter 10000 caracteres ou menos"),
   tags: z.array(z.custom<TagPrisma>()),
   userId: z.number().int(),
   important: z.boolean(),
@@ -44,16 +44,15 @@ const createNewsResponse = z.object({
   id: z.number().int(),
 });
 
-export const updateNewsSchema = z.object({
-  id: z.number().int(),
+export const updateNewsSchema = z.object({ 
   title: z
     .string()
-    .min(20, "Título deve ter mais de 20 caracteres")
+    .min(8, "Título deve ter mais de 8 caracteres")
     .max(120, "Título deve ter 120 caracteres ou menos")
     .optional(),
   argument: z
     .string()
-    .max(10000, "Conteúdo deve ter 10000 caracteres ou menos")
+    .max(20000, "Conteúdo deve ter 10000 caracteres ou menos")
     .optional(),
   tags: z.array(z.custom<TagPrisma>()).optional(),
   important: z.boolean().optional(),
@@ -71,7 +70,7 @@ const updateResponseNewsSchema = z.object({
 export const aiVerificationTextSchema = z.object({
   argument: z
     .string()
-    .max(10000, "Conteúdo deve ter 10000 caracteres ou menos"),
+    .max(20000, "Conteúdo deve ter 10000 caracteres ou menos"),
 });
 export type AiVerificationTextInput = z.infer<typeof aiVerificationTextSchema>;
 

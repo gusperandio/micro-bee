@@ -35,17 +35,17 @@ model User {
 model News {
   id         Int      @id @default(autoincrement())
   title      String
-  argument   String   @db.VarChar(255)
+  argument   String   @db.Text
   tags       Tag[]
   userId     Int
   user       User     @relation(fields: [userId], references: [id])
   important  Boolean
   minReads   Int?
   aiValidate Boolean  @default(false)
-  cape       String   @db.VarChar(255)
-  photo1     String?   @db.VarChar(255)
-  photo2     String?   @db.VarChar(255)
-  photo3     String?   @db.VarChar(255)
+  cape       String   @db.Text
+  photo1     String?  @db.Text
+  photo2     String?  @db.Text
+  photo3     String?  @db.Text
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
@@ -127,7 +127,7 @@ model UserRole {
 model Log {
   id        Int      @id @default(autoincrement())
   name      String
-  error     String   @db.VarChar(255)
+  error     String   @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -22,7 +22,7 @@ export async function newsRoutes(app: FastifyInstance) {
           newsId: { type: "string" },
         },
         response: {
-          200: $ref("newsArraySchemaResponse"),
+          200: $ref("searchResponseNewsSchema"),
         },
       },
     },
@@ -30,7 +30,7 @@ export async function newsRoutes(app: FastifyInstance) {
   );
 
   app.get(
-    "",
+    "/",
     {
       preHandler: [authMiddleware],
       schema: {

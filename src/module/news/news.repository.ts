@@ -11,26 +11,48 @@ const prisma = new PrismaClient();
 export async function findNewsById(id: number) {
   return prisma.news.findUnique({
     where: { id },
-  });
-}
-
-export async function findAllNews() {
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 3);
-
-  return prisma.news.findMany({
-    where: {
-      createdAt: {
-        gte: sevenDaysAgo,
-      },
+    include: {
+      tags: true,
     },
   });
 }
 
-export async function findNewsByUserId(userId: number) {
-  return prisma.news.findMany({
-    where: { userId },
-  });
+export async function findAllNews(): Promise<NewsPrisma[]> {
+  try {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 3);
+
+    const allNews = await prisma.news.findMany({
+      where: {
+        createdAt: {
+          gte: sevenDaysAgo,
+        },
+      },
+      include: {
+        tags: true,
+      },
+    });
+
+    return allNews ? allNews : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+export async function findNewsByUserId(userId: number): Promise<NewsPrisma[]> {
+  try {
+    const newsByUser = await prisma.news.findMany({
+      where: { userId },
+      include: {
+        tags: true,
+      },
+    });
+
+    return newsByUser ? newsByUser : [];
+  } catch (error) {
+    console.error("Erro", error);
+    return [];
+  }
 }
 
 export const insertNews = async (
@@ -89,12 +111,15 @@ export async function updateNews(id: number, data: UpdateNewsInput) {
 }
 
 export async function deleteNews(id: number) {
-  return prisma.news.delete({
-    where: { id },
-  });
+  try {
+    return prisma.news.delete({
+      where: { id },
+    });
+  } catch (error) {
+    console.error("Erro", error);
+    return null;
+  }
 }
-
-
 
 export async function validateAI(data: AiVerificationTextInput) {
   return { verify: true };
