@@ -1,9 +1,9 @@
-"use strict";
-import { FastifyReply, FastifyRequest } from "fastify";
-import { userRoutes } from "./src/module/user/user.routes";
-import { userSchemas } from "./src/module/user/user.schema";
+import { userRoutes } from "./module/user/user.routes";
+import { userSchemas } from "./module/user/user.schema";
 import fCookie from "@fastify/cookie";
 import fjwt, { FastifyJWT } from "@fastify/jwt";
+import { newsRoutes } from "./module/news/news.routes";
+import { newsSchemas } from "./module/news/news.schema";
 
 const fastify = require("fastify")({ logger: true });
 const cors = require("@fastify/cors");
@@ -47,45 +47,12 @@ for (let schema of userSchemas) {
   fastify.addSchema(schema);
 }
 
+for (let newsSchema of newsSchemas) {
+  fastify.addSchema(newsSchema);
+}
+
 fastify.register(userRoutes, { prefix: "/api/v1/user" });
-
-// const { Server } = require("socket.io");
-// const server = fastify.server;
-
-// const io = new Server(server, {
-//   cors: {
-//     origin: "*",
-//     methods: ["*"],
-//   },
-// });
-
-// io.on("connection", (socket: any) => {
-//   console.log("a user connected");
-
-//   socket.on("message", (data: any) => {
-//     io.emit("message", `Server received: ${data}`);
-//   });
-
-//   socket.on("approved", (data: any) => {
-//     io.emit("approved", `${data} Aprovou!`);
-//   });
-
-//   socket.on("refused", (data: any) => {
-//     io.emit("refused", `${data} Reprovou!`);
-//   });
-
-//   socket.on("noVote", (data: any) => {
-//     io.emit("noVote", `${data} Não votou!`);
-//   });
-
-//   socket.on("showModal", () => {
-//     io.emit("showModal");
-//   });
-
-//   socket.on("disconnect", () => {
-//     console.log("User disconnected:", socket.id);
-//   });
-// });
+fastify.register(newsRoutes, { prefix: "/api/v1/news" });
 
 // Start the server
 const listeners = ["SIGINT", "SIGTERM"];

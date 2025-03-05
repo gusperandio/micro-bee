@@ -1,9 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import { News as NewsPrisma, PrismaClient } from "@prisma/client";
 import {
   CreateNewsInput,
   UpdateNewsInput,
   AiVerificationTextInput,
 } from "./news.schema";
+import { readTime } from "./news.service";
 
 const prisma = new PrismaClient();
 
@@ -14,19 +15,76 @@ export async function findNewsById(id: number) {
 }
 
 export async function findAllNews() {
-  return prisma.news.findMany();
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 3);
+
+  return prisma.news.findMany({
+    where: {
+      createdAt: {
+        gte: sevenDaysAgo,
+      },
+    },
+  });
 }
 
-export async function insertNews(data: CreateNewsInput) {
-  // return prisma.news.create({
-  //   data,
-  // });
+export async function findNewsByUserId(userId: number) {
+  return prisma.news.findMany({
+    where: { userId },
+  });
 }
+
+export const insertNews = async (
+  data: CreateNewsInput
+): Promise<NewsPrisma | null> => {
+  try {
+    const newPost = await prisma.news.create({
+      data: {
+        title: data.title!,
+        argument: data.argument!,
+        tags: {
+          connect: data.tags.map((tag) => ({ id: tag.id })),
+        },
+        userId: data.userId,
+        important: data.important!,
+        minReads: readTime(data.argument!),
+        aiValidate: true,
+        cape: data.cape!,
+        photo1: data.photo1!,
+        photo2: data.photo2!,
+        photo3: data.photo3!,
+      },
+    });
+
+    if (!newPost) {
+      throw new Error("Erro ao publicar seu conteúdo");
+    }
+
+    return newPost;
+  } catch (error) {
+    console.error("Erro", error);
+    return null;
+  }
+};
 
 export async function updateNews(id: number, data: UpdateNewsInput) {
+  const updateData = {
+    title: data.title,
+    argument: data.argument,
+    important: data.important,
+    cape: data.cape,
+    photo1: data.photo1,
+    photo2: data.photo2,
+    photo3: data.photo3,
+    ...(data.tags && {
+      tags: {
+        set: data.tags.map((tag) => ({ id: tag.id })),
+      },
+    }),
+  };
+
   return prisma.news.update({
     where: { id },
-    data,
+    data: updateData,
   });
 }
 
@@ -36,11 +94,7 @@ export async function deleteNews(id: number) {
   });
 }
 
-export async function findNewsByUserId(userId: number) {
-  return prisma.news.findMany({
-    where: { userId },
-  });
-}
+
 
 export async function validateAI(data: AiVerificationTextInput) {
   return { verify: true };

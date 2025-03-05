@@ -72,4 +72,4 @@ export const { schemas: userSchemas, $ref } = buildJsonSchemas({
   deleteResponseUserSchema,
   updateUserSchema,
   updateResponseUserSchema,
-});
+}, { $id: 'userSchema' });

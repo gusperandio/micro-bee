@@ -43,9 +43,9 @@ model News {
   minReads   Int?
   aiValidate Boolean  @default(false)
   cape       String   @db.VarChar(255)
-  photo1     String   @db.VarChar(255)
-  photo2     String   @db.VarChar(255)
-  photo3     String   @db.VarChar(255)
+  photo1     String?   @db.VarChar(255)
+  photo2     String?   @db.VarChar(255)
+  photo3     String?   @db.VarChar(255)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }

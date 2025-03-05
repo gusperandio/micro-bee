@@ -1,19 +1,28 @@
 import { FastifyInstance } from "fastify";
 import { authMiddleware } from "../../config/authenticate";
 import { $ref } from "../news/news.schema";
-import { createNews, removeNews, getAllNews, getNewsById, getNewsByUserId, putNews, callAi } from "./news.controller";
+import {
+  createNews,
+  removeNews,
+  getAllNews,
+  getNewsById,
+  getNewsByUserId,
+  putNews,
+  callAi,
+} from "./news.controller";
 
 export async function newsRoutes(app: FastifyInstance) {
   app.get(
-    "/news/:id",
+    "/:newsId",
     {
       preHandler: [authMiddleware],
       schema: {
-        params: {
-          id: { type: "string" },
+        type: "object",
+        properties: {
+          newsId: { type: "string" },
         },
         response: {
-          200: $ref("searchResponseNewsSchema"),
+          200: $ref("newsArraySchemaResponse"),
         },
       },
     },
@@ -21,7 +30,7 @@ export async function newsRoutes(app: FastifyInstance) {
   );
 
   app.get(
-    "/news",
+    "",
     {
       preHandler: [authMiddleware],
       schema: {
@@ -34,26 +43,15 @@ export async function newsRoutes(app: FastifyInstance) {
   );
 
   app.get(
-    "/validateAI",
-    {
-      preHandler: [authMiddleware],
-      schema: {
-        body: $ref("aiVerificationTextSchema"),
-        response: {
-          200: $ref("aiVerificationResponseSchema"),
-        },
-      },
-    },
-    callAi
-  );
-
-  app.get(
-    "/news/user/:userId",
+    "/user/:userId",
     {
       preHandler: [authMiddleware],
       schema: {
         params: {
-          userId: { type: "string" },
+          type: "object",
+          properties: {
+            userId: { type: "string" },
+          },
         },
         response: {
           200: $ref("newsArraySchemaResponse"),
@@ -64,7 +62,7 @@ export async function newsRoutes(app: FastifyInstance) {
   );
 
   app.post(
-    "/news",
+    "/",
     {
       preHandler: [authMiddleware],
       schema: {
@@ -78,12 +76,15 @@ export async function newsRoutes(app: FastifyInstance) {
   );
 
   app.put(
-    "/news/:id",
+    "/:newsId",
     {
       preHandler: [authMiddleware],
       schema: {
         params: {
-          id: { type: "string" },
+          type: "object",
+          properties: {
+            newsId: { type: "string" },
+          },
         },
         body: $ref("updateNewsSchema"),
         response: {
@@ -95,12 +96,15 @@ export async function newsRoutes(app: FastifyInstance) {
   );
 
   app.delete(
-    "/news/:id",
+    "/:newsId",
     {
       preHandler: [authMiddleware],
       schema: {
         params: {
-          id: { type: "string" },
+          type: "object",
+          properties: {
+            newsId: { type: "string" },
+          },
         },
         response: {
           200: $ref("deleteResponseNewsSchema"),
@@ -109,4 +113,20 @@ export async function newsRoutes(app: FastifyInstance) {
     },
     removeNews
   );
+
+  app.post(
+    "/validateAI",
+    {
+      preHandler: [authMiddleware],
+      schema: {
+        body: $ref("aiVerificationTextSchema"),
+        response: {
+          200: $ref("aiVerificationResponseSchema"),
+        },
+      },
+    },
+    callAi
+  );
+
+  app.log.info("news routes registered");
 }

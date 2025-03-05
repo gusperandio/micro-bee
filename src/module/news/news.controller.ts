@@ -19,8 +19,8 @@ export async function getNewsById(
   req: FastifyRequest<{ Params: SearchNewsInput }>,
   reply: FastifyReply
 ) {
-  const { id } = req.params;
-  const news = await findNewsById(id);
+  const { newsId } = req.params;
+  const news = await findNewsById(Number(newsId));
   reply.send(news);
 }
 
@@ -29,21 +29,12 @@ export async function getAllNews(req: FastifyRequest, reply: FastifyReply) {
   reply.send(news);
 }
 
-export async function callAi(
-  req: FastifyRequest<{ Body: AiVerificationTextInput }>,
-  reply: FastifyReply
-) {
-  const { argument } = req.body;
-  const result = await validateAI({ argument });
-  reply.send(result);
-}
-
 export async function getNewsByUserId(
   req: FastifyRequest<{ Params: { userId: string } }>,
   reply: FastifyReply
 ) {
   const { userId } = req.params;
-  const news = await findNewsByUserId(userId);
+  const news = await findNewsByUserId(Number(userId));
   reply.send(news);
 }
 
@@ -62,7 +53,7 @@ export async function putNews(
 ) {
   const { id } = req.params;
   const newsData = req.body;
-  const updatedNews = await updateNews(id, newsData);
+  const updatedNews = await updateNews(Number(id), newsData);
   reply.send(updatedNews);
 }
 
@@ -71,6 +62,15 @@ export async function removeNews(
   reply: FastifyReply
 ) {
   const { id } = req.params;
-  const deletedNews = await deleteNews(id);
+  const deletedNews = await deleteNews(Number(id));
   reply.send(deletedNews);
+}
+
+export async function callAi(
+  req: FastifyRequest<{ Body: AiVerificationTextInput }>,
+  reply: FastifyReply
+) {
+  const { argument } = req.body;
+  const result = await validateAI({ argument });
+  reply.send(result);
 }

@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "main": "server.ts",
   "scripts": {
-    "dev": "nodemon server.ts",
+    "dev": "nodemon src/server.ts",
     "test": "jest",
     "build": "tsc -p tsconfig.json"
   },
@@ -10,7 +10,7 @@
   "author": "",
   "license": "MIT",
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx src/prisma/seed.ts"
   },
   "description": "",
   "dependencies": {
