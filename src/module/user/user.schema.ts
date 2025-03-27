@@ -7,17 +7,19 @@ const createUserSchema = z.object({
   name: z.string(),
   age: z.number(),
   role: z.string().optional(),
+  country: z.string().optional(),
 });
+export type CreateUserInput = z.infer<typeof createUserSchema>;
+
 
 const createOrLoginSocialUserSchema = z.object({
   email: z.string(),
   name: z.string(),
 });
-
-export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type CreateOrLoginSocialUserInput = z.infer<
   typeof createOrLoginSocialUserSchema
 >;
+
 
 const loginSchema = z.object({
   email: z
@@ -28,8 +30,8 @@ const loginSchema = z.object({
     .email(),
   password: z.string().min(6).max(40),
 });
-
 export type LoginUserInput = z.infer<typeof loginSchema>;
+
 
 const loginResponseSchema = z.object({
   id: z.string(),
@@ -63,6 +65,14 @@ const deleteResponseUserSchema = z.object({
   message: z.string(),
 });
 
+const creditCardSchema = z.object({
+  cardNumber: z.string().regex(/^\d{16}$/, "Card number must be 16 digits"),
+  cardHolderName: z.string(),
+  expirationDate: z.string().regex(/^(0[1-9]|1[0-2])\/\d{2}$/, "Expiration date must be in MM/YY format"),
+  cvv: z.string().regex(/^\d{3,4}$/, "CVV must be 3 or 4 digits"),
+});
+
+export type CreditCardInput = z.infer<typeof creditCardSchema>;
 export const { schemas: userSchemas, $ref } = buildJsonSchemas({
   createUserSchema,
   createOrLoginSocialUserSchema,

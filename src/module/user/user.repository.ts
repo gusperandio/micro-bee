@@ -1,7 +1,5 @@
 import { PrismaClient, User as UserPrisma } from "@prisma/client";
-import { UserLoginType, UserSocialLoginType, UserType } from "../../types/User";
 import passManager from "../../util/passwordManager";
-import { RespCustomType } from "../../types/RespCustom";
 import prisma from "../../util/prisma";
 
 export const userExist = async (email: string): Promise<boolean> => {
@@ -36,7 +34,7 @@ export const getUserByEmail = async (
 };
 
 export const createUser = async (
-  data: Partial<UserType>
+  data: Partial<UserPrisma>
 ): Promise<UserPrisma | null> => {
   try {
     const newUser = await prisma.user.create({
@@ -51,7 +49,7 @@ export const createUser = async (
         roles: {
           create: [
             {
-              role: { connect: { name: data.role ?? "USER" } },
+              role: { connect: { name: "USER" } },
             },
           ],
         },

@@ -21,6 +21,8 @@ model User {
   age         Int
   avatar      String?
   socialAuth  Boolean
+  blackList   Boolean     @default(false)
+  country     String      @default("Brasil")
   premiumTime DateTime?
   lastLogin   DateTime?
   createdAt   DateTime    @default(now())
@@ -85,6 +87,7 @@ model Payment {
   method    PaymentMethod
   user      User          @relation(fields: [userId], references: [id])
   userId    Int
+  status    String
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
   voucher   Voucher?      @relation(fields: [voucherId], references: [id])
@@ -99,6 +102,7 @@ enum PaymentMethod {
   VOUCHER
 }
 
+// Discount in payments
 model Voucher {
   id              Int       @id @default(autoincrement())
   code            String    @unique

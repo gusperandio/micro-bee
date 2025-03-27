@@ -19,71 +19,189 @@ export async function getNewsById(
   req: FastifyRequest<{ Params: SearchNewsInput }>,
   reply: FastifyReply
 ) {
-  const { newsId } = req.params;
-  const news = await findNewsById(Number(newsId));
-  reply.send(news);
-}
+  try {
+    const { newsId } = req.params;
+    const news = await findNewsById(Number(newsId));
 
-export async function getAllNews(req: FastifyRequest, reply: FastifyReply) {
-  const news = await findAllNews();
-  if (!news) {
-    return reply.status(204).send({
-      message: "Nenhum conteúdo encontrado",
+    if (!news) {
+      return reply.code(404).send({
+        statusCode: 404,
+        message: "Notícia não encontrada",
+      });
+    }
+
+    return reply.code(200).send({
+      statusCode: 200,
+      message: "Notícia encontrada",
+      data: news,
+    });
+  } catch (error) {
+    console.error("Erro ao buscar notícia:", error);
+    return reply.code(500).send({
+      statusCode: 500,
+      message: "Erro ao buscar notícia",
     });
   }
-  reply.send(news);
 }
+ 
+export async function getAllNews(req: FastifyRequest, reply: FastifyReply) {
+  try {
+    const news = await findAllNews();
 
+    if (!news.length) {
+      return reply.code(204).send({
+        statusCode: 204,
+        message: "Nenhuma notícia encontrada",
+      });
+    }
+
+    return reply.code(200).send({
+      statusCode: 200,
+      message: "Notícias encontradas",
+      data: news,
+    });
+  } catch (error) {
+    console.error("Erro ao buscar notícias:", error);
+    return reply.code(500).send({
+      statusCode: 500,
+      message: "Erro ao buscar notícias",
+    });
+  }
+}
+ 
 export async function getNewsByUserId(
   req: FastifyRequest<{ Params: { userId: string } }>,
   reply: FastifyReply
 ) {
-  const { userId } = req.params;
-  const news = await findNewsByUserId(Number(userId));
-  if (!news)
-    return reply.status(204).send({
-      message: "Nenhum conteúdo encontrado",
-    });
+  try {
+    const { userId } = req.params;
+    const news = await findNewsByUserId(Number(userId));
 
-  reply.send(news);
+    if (!news.length) {
+      return reply.code(204).send({
+        statusCode: 204,
+        message: "Nenhuma notícia encontrada para este usuário",
+      });
+    }
+
+    return reply.code(200).send({
+      statusCode: 200,
+      message: "Notícias encontradas",
+      data: news,
+    });
+  } catch (error) {
+    console.error("Erro ao buscar notícias do usuário:", error);
+    return reply.code(500).send({
+      statusCode: 500,
+      message: "Erro ao buscar notícias do usuário",
+    });
+  }
 }
+
 
 export async function createNews(
   req: FastifyRequest<{ Body: CreateNewsInput }>,
   reply: FastifyReply
 ) {
-  const newsData = req.body;
-  const news = await insertNews(newsData);
-  reply.send({ id: news?.id, message: "News created successfully" });
+  try {
+    const newsData = req.body;
+    const news = await insertNews(newsData);
+
+    if (!news) {
+      throw new Error("Erro ao criar notícia");
+    }
+
+    return reply.code(201).send({
+      statusCode: 201,
+      message: "Notícia criada com sucesso",
+      data: { id: news.id },
+    });
+  } catch (error) {
+    console.error("Erro ao criar notícia:", error);
+    return reply.code(500).send({
+      statusCode: 500,
+      message: "Erro ao criar notícia",
+    });
+  }
 }
 
 export async function putNews(
   req: FastifyRequest<{ Params: { newsId: string }; Body: UpdateNewsInput }>,
   reply: FastifyReply
 ) {
-  const { newsId } = req.params;
-  const newsData = req.body;
-  const updatedNews = await updateNews(Number(newsId), newsData);
-  reply.send(updatedNews);
+  try {
+    const { newsId } = req.params;
+    const newsData = req.body;
+    const updatedNews = await updateNews(Number(newsId), newsData);
+
+    if (!updatedNews) {
+      return reply.code(404).send({
+        statusCode: 404,
+        message: "Notícia não encontrada para atualização",
+      });
+    }
+
+    return reply.code(200).send({
+      statusCode: 200,
+      message: "Notícia atualizada com sucesso",
+      data: updatedNews,
+    });
+  } catch (error) {
+    console.error("Erro ao atualizar notícia:", error);
+    return reply.code(500).send({
+      statusCode: 500,
+      message: "Erro ao atualizar notícia",
+    });
+  }
 }
 
 export async function removeNews(
   req: FastifyRequest<{ Params: { newsId: string } }>,
   reply: FastifyReply
 ) {
-  const { newsId } = req.params;
-  const deletedNews = await deleteNews(Number(newsId));
-  if (!deletedNews) {
-    return reply.status(404).send({ message: "Erro ao deletar conteúdo!" });
+  try {
+    const { newsId } = req.params;
+    const deletedNews = await deleteNews(Number(newsId));
+
+    if (!deletedNews) {
+      return reply.code(404).send({
+        statusCode: 404,
+        message: "Notícia não encontrada para remoção",
+      });
+    }
+
+    return reply.code(200).send({
+      statusCode: 200,
+      message: "Notícia removida com sucesso",
+    });
+  } catch (error) {
+    console.error("Erro ao remover notícia:", error);
+    return reply.code(500).send({
+      statusCode: 500,
+      message: "Erro ao remover notícia",
+    });
   }
-  reply.send({ message : "News deleted successfully" });
 }
+
 
 export async function callAi(
   req: FastifyRequest<{ Body: AiVerificationTextInput }>,
   reply: FastifyReply
 ) {
-  const { argument } = req.body;
-  const result = await validateAI({ argument });
-  reply.send(result);
+  try {
+    const { argument } = req.body;
+    const result = await validateAI({ argument });
+
+    return reply.code(200).send({
+      statusCode: 200,
+      message: "Validação concluída",
+      data: result,
+    });
+  } catch (error) {
+    console.error("Erro ao validar com IA:", error);
+    return reply.code(500).send({
+      statusCode: 500,
+      message: "Erro ao validar com IA",
+    });
+  }
 }

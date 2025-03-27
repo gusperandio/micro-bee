@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { authMiddleware } from "../../config/authenticate";
-import { $ref } from "../news/news.schema";
+import { $ref } from "./news.schema";
 import {
   createNews,
   removeNews,

@@ -1,4 +1,4 @@
-import { UserType } from "./../../types/User";
+ import {  User as UserPrisma } from "@prisma/client";
 import { FastifyRequest, FastifyReply } from "fastify";
 import {
   CreateOrLoginSocialUserInput,
@@ -6,8 +6,7 @@ import {
   DeleteUserInput,
   LoginUserInput,
   UpdateUserInput,
-} from "./user.schema";
-import prisma from "../../util/prisma";
+} from "./user.schema"; 
 import {
   userExist,
   deleteUser,
@@ -18,8 +17,7 @@ import {
   createUser,
 } from "./user.repository";
 import PasswordManager from "../../util/passwordManager";
-import { payload } from "../../util/payload";
-import { askChatGPT } from "../../util/openai";
+import { payload } from "../../util/payload"; 
 export async function createUserController(
   req: FastifyRequest<{
     Body: CreateUserInput;
@@ -35,12 +33,11 @@ export async function createUserController(
     }
 
     const hash = await PasswordManager.getInstance().hashPassword(password);
-    const userType: Partial<UserType> = {
+    const userType: Partial<UserPrisma> = {
       password: hash,
       email: email,
       name: name,
-      age: age,
-      role: role,
+      age: age, 
       socialAuth: false,
     };
 
@@ -78,7 +75,7 @@ export async function loginSocialController(
 
     let user = await getUserByEmail(email);
     if (!user) {
-      const userType: Partial<UserType> = {
+      const userType: Partial<UserPrisma> = {
         email: email,
         name: name,
         age: 0,
