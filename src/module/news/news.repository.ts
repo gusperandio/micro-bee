@@ -1,4 +1,4 @@
-import { News as NewsPrisma, Reports as ReportsPrisma } from "@prisma/client";
+import { News as NewsPrisma } from "@prisma/client";
 import {
   CreateNewsInput,
   UpdateNewsInput,
@@ -115,14 +115,14 @@ export async function validateAI(
 }
 
 export async function createReport(
-  idNews: number,
   idUser: number,
+  idNews: number,
   reason: string
 ) {
   try {
-    await prisma.reports.create({
+    await prisma.reportsNews.create({
       data: {
-        userId: idUser,
+        idUserReporter: idUser,
         newsId: idNews,
         reason: reason,
       },

@@ -1,20 +1,12 @@
 import { FastifyInstance } from "fastify";
 import { authMiddleware } from "../../config/authenticate";
-import { $ref } from "./news.schema";
-import {
-  createNews,
-  removeNews,
-  getAllNews,
-  getNewsById,
-  getNewsByUserId,
-  putNews,
-  callAi,
-  createReportNews,
-} from "./news.controller";
+import { $ref } from "./publicity.schema";
+import { createPub, createReportPublicities, getAllPubs, getPubById, getPubsByUserId, putPub, removePub } from "./publicity.controller";
 
-export async function newsRoutes(app: FastifyInstance) {
+ 
+export async function publicitiesRoutes(app: FastifyInstance) {
   app.get(
-    "/:newsId",
+    "/:pubId",
     {
       preHandler: [authMiddleware],
       schema: {
@@ -23,11 +15,11 @@ export async function newsRoutes(app: FastifyInstance) {
           newsId: { type: "string" },
         },
         response: {
-          200: $ref("searchResponseNewsSchema"),
+          200: $ref("searchPubSchema"),
         },
       },
     },
-    getNewsById
+    getPubById
   );
 
   app.get(
@@ -36,15 +28,15 @@ export async function newsRoutes(app: FastifyInstance) {
       preHandler: [authMiddleware],
       schema: {
         response: {
-          200: $ref("newsArraySchemaResponse"),
+          200: $ref("pubsArraySchemaResponse"),
         },
       },
     },
-    getAllNews
+    getAllPubs
   );
 
   app.get(
-    "/user/:userId",
+    "/pub/:userId",
     {
       preHandler: [authMiddleware],
       schema: {
@@ -55,11 +47,11 @@ export async function newsRoutes(app: FastifyInstance) {
           },
         },
         response: {
-          200: $ref("newsArraySchemaResponse"),
+          200: $ref("pubsArraySchemaResponse"),
         },
       },
     },
-    getNewsByUserId
+    getPubsByUserId
   );
 
   app.post(
@@ -67,17 +59,17 @@ export async function newsRoutes(app: FastifyInstance) {
     {
       preHandler: [authMiddleware],
       schema: {
-        body: $ref("createNewsSchema"),
+        body: $ref("createPubSchema"),
         response: {
-          200: $ref("createNewsResponse"),
+          200: $ref("createPubResponse"),
         },
       },
     },
-    createNews
+    createPub
   );
 
   app.put(
-    "/:newsId",
+    "/:pubId",
     {
       preHandler: [authMiddleware],
       schema: {
@@ -87,17 +79,17 @@ export async function newsRoutes(app: FastifyInstance) {
             newsId: { type: "string" },
           },
         },
-        body: $ref("updateNewsSchema"),
+        body: $ref("updatePubSchema"),
         response: {
-          200: $ref("searchResponseNewsSchema"),
+          200: $ref("updateResponsePubSchema"),
         },
       },
     },
-    putNews
+    putPub
   );
 
   app.delete(
-    "/:newsId",
+    "/:pubId",
     {
       preHandler: [authMiddleware],
       schema: {
@@ -108,25 +100,11 @@ export async function newsRoutes(app: FastifyInstance) {
           },
         },
         response: {
-          200: $ref("deleteResponseNewsSchema"),
+          200: $ref("deleteResponsePubSchema"),
         },
       },
     },
-    removeNews
-  );
-
-  app.post(
-    "/validateAI",
-    {
-      preHandler: [authMiddleware],
-      schema: {
-        body: $ref("aiVerificationTextSchema"),
-        response: {
-          200: $ref("aiVerificationResponseSchema"),
-        },
-      },
-    },
-    callAi
+    removePub
   );
 
   app.post(
@@ -134,14 +112,14 @@ export async function newsRoutes(app: FastifyInstance) {
     {
       preHandler: [authMiddleware],
       schema: {
-        body: $ref("reportNewsSchema"),
+        body: $ref("reportPubSchema"),
         response: {
-          200: $ref("reportNewsSchemaResponse"),
+          200: $ref("reportPubSchemaResponse"),
         },
       },
     },
-    createReportNews
+    createReportPublicities
   );
 
-  app.log.info("news routes registered");
+  app.log.info("publicity routes registered");
 }

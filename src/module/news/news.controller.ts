@@ -208,27 +208,19 @@ export async function callAi(
   }
 }
 
-export async function reportNews(
+export async function createReportNews(
   req: FastifyRequest<{ Body: ReportInput }>,
   reply: FastifyReply
 ) {
   try {
-    const { idNews, reason } = req.body;
-    const resultNews = await findNewsById(idNews);
-  
-    if (!resultNews) {
-      return reply.code(404).send({
-        statusCode: 404,
-        message: "Notícia não encontrada",
-      });
-    }
+    const { idUserReporter, idNews, reason } = req.body;
 
-    await createReport(resultNews.id, resultNews.userId, reason);
+    await createReport(idUserReporter, idNews, reason);
 
-    return reply.code(200).send({ 
-      message: "Agradecemos o seu feedback!", 
+    return reply.code(200).send({
+      message: "Agradecemos o seu feedback!",
     });
-  } catch (error) { 
+  } catch (error) {
     return reply.code(500).send({
       statusCode: 500,
       message: "Erro ao reportar notícia",

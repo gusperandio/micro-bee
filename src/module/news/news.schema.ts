@@ -83,6 +83,7 @@ const deleteResponseNewsSchema = z.object({
 });
 
 const reportNewsSchema = z.object({
+  idUserReporter: z.number().int(),
   idNews: z.number().int(),
   reason: z.string(),
 });

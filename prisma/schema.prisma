@@ -28,31 +28,47 @@ model User {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   news        News[]
+  publicity   Publicity[]
   awards      Award[]
   creditCard  CreditCard?
   roles       UserRole[]
   payments    Payment[]
   SmsCode     SmsCode[]
-  Reports     Reports[]
 }
 
 model News {
-  id         Int       @id @default(autoincrement())
+  id         Int           @id @default(autoincrement())
   title      String
-  argument   String    @db.Text
+  argument   String        @db.Text
   tags       Tag[]
   userId     Int
-  user       User      @relation(fields: [userId], references: [id])
+  user       User          @relation(fields: [userId], references: [id])
   important  Boolean
   minReads   Int?
-  aiValidate Boolean   @default(false)
-  cape       String    @db.Text
-  photo1     String?   @db.Text
-  photo2     String?   @db.Text
-  photo3     String?   @db.Text
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  Reports    Reports[]
+  aiValidate Boolean       @default(false)
+  cape       String        @db.Text
+  photo1     String?       @db.Text
+  photo2     String?       @db.Text
+  photo3     String?       @db.Text
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  Reports    ReportsNews[]
+}
+
+model Publicity {
+  id Int @id @default(autoincrement())
+
+  title       String?
+  description String?  @db.Text
+  url         String?
+  photo       String   @db.Text
+  cape        String   @db.Text
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ReportsPublicity ReportsPublicity[]
 }
 
 model Tag {
@@ -141,16 +157,26 @@ model SmsCode {
   @@index([userId])
 }
 
-model Reports {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  newsId    Int
-  news      News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
-  reason    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model ReportsNews {
+  id             Int      @id @default(autoincrement())
+  idUserReporter Int
+  newsId         Int
+  news           News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  reason         String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  @@index([userId])
   @@index([newsId])
+}
+
+model ReportsPublicity {
+  id             Int       @id @default(autoincrement())
+  idUserReporter Int
+  publicityId    Int
+  publicity      Publicity @relation(fields: [publicityId], references: [id], onDelete: Cascade)
+  reason         String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([publicityId])
 }
