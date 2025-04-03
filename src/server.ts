@@ -1,9 +1,10 @@
 import { userRoutes } from "./module/user/user.routes";
 import { userSchemas } from "./module/user/user.schema";
 import fCookie from "@fastify/cookie";
-import fjwt, { FastifyJWT } from "@fastify/jwt";
 import { newsRoutes } from "./module/news/news.routes";
 import { newsSchemas } from "./module/news/news.schema";
+import { PaymentSchemas } from "./module/payments/payments.schema";
+import { paymentRoutes } from "./module/payments/payments.routes";
 
 const fastify = require("fastify")({ logger: true });
 const cors = require("@fastify/cors");
@@ -15,44 +16,16 @@ fastify.register(cors, {
 
 fastify.register(require("@fastify/jwt"), { secret: process.env.SECRET_KEY });
 
-// fastify.addHook(
-//   "preHandler",
-//   async (req: FastifyRequest, reply: FastifyReply) => {
-//     try {
-//       console.log(req.originalUrl);
-//       await req.jwtVerify();
-//     } catch (err) {
-//       reply.send(err);
-//     }
-//   }
-// );
-
 fastify.register(fCookie, {
   secret: process.env.COOKIE_KEY,
   hook: "preHandler",
 });
 
-//  fastify.decorate(
-//    "authenticate",
-//    async function (req: FastifyRequest, reply: FastifyReply) {
-//      try {
-//        await req.jwtVerify();
-//      } catch (err) {
-//        reply.status(401).send({ message: "Unauthorized" });
-//      }
-//    }
-//  );
-
-for (let schema of userSchemas) {
-  fastify.addSchema(schema);
-}
-
-for (let newsSchema of newsSchemas) {
-  fastify.addSchema(newsSchema);
-}
+[userSchemas, newsSchemas, PaymentSchemas].flat().forEach((schema) => fastify.addSchema(schema));
 
 fastify.register(userRoutes, { prefix: "/api/v1/user" });
 fastify.register(newsRoutes, { prefix: "/api/v1/news" });
+fastify.register(paymentRoutes, { prefix: "/api/v1/payment" });
 
 // Start the server
 const listeners = ["SIGINT", "SIGTERM"];
@@ -72,4 +45,5 @@ async function main() {
     fastify.log.info(`Server listening at ${address}`);
   });
 }
+
 main();

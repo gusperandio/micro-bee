@@ -4,6 +4,7 @@ import {
   CreateNewsInput,
   UpdateNewsInput,
   AiVerificationTextInput,
+  ReportInput,
 } from "./news.schema";
 import {
   findNewsById,
@@ -13,6 +14,7 @@ import {
   deleteNews,
   findNewsByUserId,
   validateAI,
+  createReport,
 } from "./news.repository";
 
 export async function getNewsById(
@@ -202,6 +204,34 @@ export async function callAi(
     return reply.code(500).send({
       statusCode: 500,
       message: "Erro ao validar com IA",
+    });
+  }
+}
+
+export async function reportNews(
+  req: FastifyRequest<{ Body: ReportInput }>,
+  reply: FastifyReply
+) {
+  try {
+    const { idNews, reason } = req.body;
+    const resultNews = await findNewsById(idNews);
+  
+    if (!resultNews) {
+      return reply.code(404).send({
+        statusCode: 404,
+        message: "Notícia não encontrada",
+      });
+    }
+
+    await createReport(resultNews.id, resultNews.userId, reason);
+
+    return reply.code(200).send({ 
+      message: "Agradecemos o seu feedback!", 
+    });
+  } catch (error) { 
+    return reply.code(500).send({
+      statusCode: 500,
+      message: "Erro ao reportar notícia",
     });
   }
 }

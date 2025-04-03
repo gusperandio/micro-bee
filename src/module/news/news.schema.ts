@@ -44,7 +44,7 @@ const createNewsResponse = z.object({
   id: z.number().int(),
 });
 
-export const updateNewsSchema = z.object({ 
+export const updateNewsSchema = z.object({
   title: z
     .string()
     .min(8, "Título deve ter mais de 8 caracteres")
@@ -82,6 +82,16 @@ const deleteResponseNewsSchema = z.object({
   message: z.string(),
 });
 
+const reportNewsSchema = z.object({
+  idNews: z.number().int(),
+  reason: z.string(),
+});
+
+const reportNewsSchemaResponse = z.object({
+  message: z.string(),
+});
+export type ReportInput = z.infer<typeof reportNewsSchema>;
+
 export const { schemas: newsSchemas, $ref } = buildJsonSchemas(
   {
     createNewsSchema,
@@ -94,6 +104,8 @@ export const { schemas: newsSchemas, $ref } = buildJsonSchemas(
     aiVerificationTextSchema,
     deleteResponseNewsSchema,
     aiVerificationResponseSchema,
+    reportNewsSchema,
+    reportNewsSchemaResponse,
   },
   { $id: "newsSchema" }
 );

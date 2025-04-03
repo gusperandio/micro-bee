@@ -9,6 +9,7 @@ import {
   getNewsByUserId,
   putNews,
   callAi,
+  reportNews,
 } from "./news.controller";
 
 export async function newsRoutes(app: FastifyInstance) {
@@ -126,6 +127,20 @@ export async function newsRoutes(app: FastifyInstance) {
       },
     },
     callAi
+  );
+
+  app.post(
+    "/report",
+    {
+      preHandler: [authMiddleware],
+      schema: {
+        body: $ref("reportNewsSchema"),
+        response: {
+          200: $ref("reportNewsSchemaResponse"),
+        },
+      },
+    },
+    reportNews
   );
 
   app.log.info("news routes registered");

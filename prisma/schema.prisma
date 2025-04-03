@@ -32,24 +32,27 @@ model User {
   creditCard  CreditCard?
   roles       UserRole[]
   payments    Payment[]
+  SmsCode     SmsCode[]
+  Reports     Reports[]
 }
 
 model News {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   title      String
-  argument   String   @db.Text
+  argument   String    @db.Text
   tags       Tag[]
   userId     Int
-  user       User     @relation(fields: [userId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
   important  Boolean
   minReads   Int?
-  aiValidate Boolean  @default(false)
-  cape       String   @db.Text
-  photo1     String?  @db.Text
-  photo2     String?  @db.Text
-  photo3     String?  @db.Text
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  aiValidate Boolean   @default(false)
+  cape       String    @db.Text
+  photo1     String?   @db.Text
+  photo2     String?   @db.Text
+  photo3     String?   @db.Text
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  Reports    Reports[]
 }
 
 model Tag {
@@ -102,7 +105,6 @@ enum PaymentMethod {
   VOUCHER
 }
 
-// Discount in payments
 model Voucher {
   id              Int       @id @default(autoincrement())
   code            String    @unique
@@ -128,10 +130,27 @@ model UserRole {
   @@id([userId, roleId])
 }
 
-model Log {
+model SmsCode {
   id        Int      @id @default(autoincrement())
-  name      String
-  error     String   @db.Text
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code      String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([userId])
+}
+
+model Reports {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  newsId    Int
+  news      News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  reason    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([newsId])
 }

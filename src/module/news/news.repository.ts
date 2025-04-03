@@ -1,4 +1,4 @@
-import { News as NewsPrisma } from "@prisma/client";
+import { News as NewsPrisma, Reports as ReportsPrisma } from "@prisma/client";
 import {
   CreateNewsInput,
   UpdateNewsInput,
@@ -18,7 +18,7 @@ export async function findNewsById(id: number): Promise<NewsPrisma | null> {
     throw new Error("Erro ao buscar notícia");
   }
 }
- 
+
 export async function findAllNews(days: number = 3): Promise<NewsPrisma[]> {
   try {
     const startDate = new Date();
@@ -28,13 +28,11 @@ export async function findAllNews(days: number = 3): Promise<NewsPrisma[]> {
       where: { createdAt: { gte: startDate } },
       include: { tags: true },
     });
-    
   } catch (error) {
     console.error("Erro ao buscar notícias:", error);
     throw new Error("Erro ao buscar notícias");
   }
 }
-
 
 export async function findNewsByUserId(userId: number): Promise<NewsPrisma[]> {
   try {
@@ -100,7 +98,7 @@ export async function updateNews(
     throw new Error("Erro ao atualizar notícia");
   }
 }
- 
+
 export async function deleteNews(id: number): Promise<NewsPrisma | null> {
   try {
     return await prisma.news.delete({ where: { id } });
@@ -109,9 +107,28 @@ export async function deleteNews(id: number): Promise<NewsPrisma | null> {
     throw new Error("Erro ao deletar notícia");
   }
 }
- 
+
 export async function validateAI(
   data: AiVerificationTextInput
 ): Promise<{ verify: boolean }> {
   return { verify: true };
+}
+
+export async function createReport(
+  idNews: number,
+  idUser: number,
+  reason: string
+) {
+  try {
+    await prisma.reports.create({
+      data: {
+        userId: idUser,
+        newsId: idNews,
+        reason: reason,
+      },
+    });
+  } catch (error) {
+    console.error("Erro ao criar report:", error);
+    throw new Error("Erro ao criar report");
+  }
 }
