@@ -48,8 +48,11 @@ model News {
   aiValidate Boolean       @default(false)
   cape       String        @db.Text
   photo1     String?       @db.Text
+  photo1desc String?       @db.Text
   photo2     String?       @db.Text
+  photo2desc String?       @db.Text
   photo3     String?       @db.Text
+  photo3desc String?       @db.Text
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
   Reports    ReportsNews[]

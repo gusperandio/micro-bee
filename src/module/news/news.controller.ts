@@ -45,7 +45,7 @@ export async function getNewsById(
     });
   }
 }
- 
+
 export async function getAllNews(req: FastifyRequest, reply: FastifyReply) {
   try {
     const news = await findAllNews();
@@ -70,7 +70,7 @@ export async function getAllNews(req: FastifyRequest, reply: FastifyReply) {
     });
   }
 }
- 
+
 export async function getNewsByUserId(
   req: FastifyRequest<{ Params: { userId: string } }>,
   reply: FastifyReply
@@ -99,7 +99,6 @@ export async function getNewsByUserId(
     });
   }
 }
-
 
 export async function createNews(
   req: FastifyRequest<{ Body: CreateNewsInput }>,
@@ -184,7 +183,6 @@ export async function removeNews(
     });
   }
 }
-
 
 export async function callAi(
   req: FastifyRequest<{ Body: AiVerificationTextInput }>,
